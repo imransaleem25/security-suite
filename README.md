@@ -1,4 +1,6 @@
 # Security Suite — Laravel Security Package
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/imransaleem/security-suite.svg)](https://packagist.org/packages/imransaleem/security-suite)
+[![License](https://img.shields.io/packagist/l/imransaleem/security-suite.svg)](LICENSE)
 
 A plug-and-play Laravel package for audit logging, password policy, login lockout, idle session timeout, password history UI, and optional HTTP request logging.
 
@@ -19,8 +21,8 @@ A plug-and-play Laravel package for audit logging, password policy, login lockou
 
 ## Requirements
 
-- PHP 8.0+
-- Laravel 8, 9, or 10
+- PHP 7.4+
+- Laravel 7.4, 8, 9, or 10
 - [spatie/laravel-permission](https://github.com/spatie/laravel-permission) suggested for admin UI routes (`role` middleware)
 
 ---
