@@ -51,4 +51,25 @@ return [
     | Route names excluded from idle-timer refresh (e.g. background polling in the host app).
     */
     'idle_no_refresh_route_names' => [],
+
+    /*
+    | Admin Logs menu (Bootstrap). Include in your layout:
+    |   @includeWhen(config('security_suite.menu.enabled'), 'security-suite::partials.logs-menu')
+    | Or sidebar mode:
+    |   @includeWhen(config('security_suite.menu.enabled'), 'security-suite::partials.logs-menu-sidebar')
+    */
+    'menu' => [
+        'enabled' => env('SECURITY_SUITE_MENU_ENABLED', true),
+        'mode'    => env('SECURITY_SUITE_MENU_MODE', 'dropdown'), // dropdown|sidebar
+        'label'   => env('SECURITY_SUITE_MENU_LABEL', 'Logs'),
+        'icon'    => env('SECURITY_SUITE_MENU_ICON', 'bi-journal-text'),
+        'viewer_role' => env('AUDIT_VIEWER_ROLE', 'admin'),
+        'items' => [
+            'audit'            => env('SECURITY_SUITE_MENU_AUDIT', true),
+            'password_history' => env('SECURITY_SUITE_MENU_PASSWORD_HISTORY', true),
+            'failed_login'     => env('SECURITY_SUITE_MENU_FAILED_LOGIN', true),
+            'login_logout'     => env('SECURITY_SUITE_MENU_LOGIN_LOGOUT', true),
+            'http'             => env('SECURITY_SUITE_MENU_HTTP', true),
+        ],
+    ],
 ];

@@ -16,38 +16,21 @@ A plug-and-play Laravel package for audit logging, password policy, login lockou
 | **Idle Timeout** | End session after inactivity (server middleware + optional client ping) |
 | **Password History UI** | Admin views for per-user and global password change history |
 | **HTTP Logger** | Optional request/response logging with admin viewer |
+| **Login Logs** | Failed login, login, and logout event tracking with admin UI |
+| **Logs Menu** | Bootstrap dropdown or sidebar menu, env-configurable |
+| **Login Flow Security** | Security headers + pre-login block checks via middleware |
 
 ---
 
 ## Requirements
 
-- PHP 7.4+
-- Laravel 7.4, 8, 9, or 10
+- PHP 7.4+ with `ext-json`
+- Laravel 8, 9, or 10
 - [spatie/laravel-permission](https://github.com/spatie/laravel-permission) suggested for admin UI routes (`role` middleware)
 
 ---
 
 ## Installation
-
-### From GitHub (before Packagist)
-
-```json
-"repositories": [
-    {
-        "type": "vcs",
-        "url": "https://github.com/imransaleem/security-suite"
-    }
-],
-"require": {
-    "imransaleem/security-suite": "dev-main"
-}
-```
-
-```bash
-composer require imransaleem/security-suite:dev-main
-```
-
-### From Packagist (after submission)
 
 ```bash
 composer require imransaleem/security-suite
@@ -59,8 +42,11 @@ composer require imransaleem/security-suite
 php artisan vendor:publish --tag=security-suite-config
 php artisan vendor:publish --tag=security-suite-migrations
 php artisan vendor:publish --tag=security-suite-views   # optional
+php artisan vendor:publish --tag=security-suite-assets  # idle-timeout.js
 php artisan migrate
 ```
+
+See [TESTING.md](TESTING.md) for local path-repository setup and the included demo app.
 
 ### Middleware (`app/Http/Kernel.php`)
 
@@ -95,6 +81,49 @@ Add to `$fillable` and `$casts`:
 
 Admin views use `config('security_suite.layout')` (default `layouts.app`). The password-expired screen uses `security_suite.password_expired_layout` (default `layouts.guest`).
 
+### Logs menu (Bootstrap)
+
+Add to your navbar or sidebar (mode is controlled by `SECURITY_SUITE_MENU_MODE`):
+
+```blade
+@includeWhen(config('security_suite.menu.enabled'), 'security-suite::partials.logs-menu-wrapper')
+```
+
+Or pick a template explicitly:
+
+```blade
+@include('security-suite::partials.logs-menu')          {{-- navbar dropdown --}}
+@include('security-suite::partials.logs-menu-sidebar')  {{-- sidebar list --}}
+```
+
+### Idle timeout script
+
+Publish the asset once, then include in your app layout:
+
+```bash
+php artisan vendor:publish --tag=security-suite-assets
+```
+
+```blade
+@include('security-suite::partials.idle-timeout-script')
+```
+
+Requires a `#logout-form` in the layout (standard Laravel Breeze/Jetstream pattern).
+
+### Login flow security
+
+Apply to login/register/password routes in `routes/web.php`:
+
+```php
+Route::middleware(['guest', 'login.security'])->group(function () {
+    // login, register, password reset routes
+});
+```
+
+Or add `\ImranSaleem\SecuritySuite\Middleware\SecureLoginFlow::class` to those routes in your auth scaffold.
+
+Login, logout, and failed attempts are logged automatically via Laravel auth events when `LOGIN_LOGGING_ENABLED=true`.
+
 ---
 
 ## Routes
@@ -107,6 +136,9 @@ All package routes are prefixed (default `/security`):
 | `idle.config` | `GET /security/idle-config` |
 | `password.expired` | `GET /security/password-expired` |
 | `audit.logs.index` | `GET /security/audit-logs` |
+| `password.change.logs` | `GET /security/password-change-logs` |
+| `login.logs.index` | `GET /security/login-logs` |
+| `login.failed.logs` | `GET /security/failed-login-logs` |
 | `http.logs.index` | `GET /security/http-logs` |
 
 Change the prefix with `SECURITY_SUITE_ROUTE_PREFIX` in `.env`.
@@ -125,9 +157,23 @@ SECURITY_SUITE_HOME_ROUTE=dashboard
 SECURITY_SUITE_LOGIN_ROUTE=login
 SECURITY_SUITE_IDLE_TIMEOUT=15
 
+SECURITY_SUITE_MENU_ENABLED=true
+SECURITY_SUITE_MENU_MODE=dropdown
+SECURITY_SUITE_MENU_LABEL=Logs
+SECURITY_SUITE_MENU_AUDIT=true
+SECURITY_SUITE_MENU_PASSWORD_HISTORY=true
+SECURITY_SUITE_MENU_FAILED_LOGIN=true
+SECURITY_SUITE_MENU_LOGIN_LOGOUT=true
+SECURITY_SUITE_MENU_HTTP=true
+
 LOGIN_BLOCK_MODE=temporary
 LOGIN_MAX_ATTEMPTS=5
 LOGIN_LOCKOUT_MINUTES=15
+LOGIN_LOGGING_ENABLED=true
+LOGIN_FLOW_SECURITY_ENABLED=true
+LOGIN_FORCE_HTTPS=true
+LOGIN_AUTO_BLOCK_VIA_EVENTS=true
+LOGIN_ROUTE_NAMES=login,register,password.request,password.reset
 
 PASSWORD_MIN_LENGTH=12
 PASSWORD_EXPIRY_DAYS=30
@@ -145,6 +191,8 @@ Publish `config/audit.php` and set:
 - `actions` — allowed query filters; leave `[]` to allow any action
 
 ### Idle timeout (client-side)
+
+Prefer the published script partial (see **Idle timeout script** above). Manual inline example:
 
 ```blade
 @auth
@@ -218,19 +266,47 @@ if ($this->policy->isReused($user, $request->new_password)) { /* ... */ }
 ```
 security-suite/
 ├── config/
-│   ├── security_suite.php
-│   ├── audit.php
-│   ├── login_security.php
-│   ├── password_policy.php
-│   └── http_logger.php
 ├── database/migrations/
+├── resources/
+│   ├── js/idle-timeout.js
+│   └── views/
 ├── routes/security.php
-├── resources/views/
 └── src/
+    ├── Http/Controllers/
+    ├── Listeners/
+    ├── Middleware/
+    ├── Models/
+    ├── Services/
+    └── Support/
 ```
 
 ---
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
+
+---
+
+## Packagist (maintainers)
+
+Package: [packagist.org/packages/imransaleem/security-suite](https://packagist.org/packages/imransaleem/security-suite)
+
+After merging changes:
+
+1. Push to `https://github.com/imransaleem25/security-suite`
+2. Tag a stable release (Packagist serves stable versions from Git tags):
+
+   ```bash
+   git tag -a v1.1.0 -m "Add login logs, Logs menu, login-flow security, idle-timeout asset"
+   git push origin v1.1.0
+   ```
+
+3. Confirm the Packagist GitHub webhook auto-update ran (or click **Update** on Packagist)
+4. Verify:
+
+   ```bash
+   composer require imransaleem/security-suite:^1.1
+   ```
+
+`dev-main` resolves to `1.1.x-dev` via the Composer branch alias in `composer.json`.

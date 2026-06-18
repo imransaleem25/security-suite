@@ -2,8 +2,15 @@
 
 namespace ImranSaleem\SecuritySuite;
 
+use Illuminate\Auth\Events\Failed;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Routing\Router;
+use ImranSaleem\SecuritySuite\Listeners\LogFailedLogin;
+use ImranSaleem\SecuritySuite\Listeners\LogSuccessfulLogin;
+use ImranSaleem\SecuritySuite\Listeners\LogUserLogout;
 
 class SecuritySuiteServiceProvider extends ServiceProvider
 {
@@ -17,6 +24,7 @@ class SecuritySuiteServiceProvider extends ServiceProvider
 
         $this->app->singleton(Services\AuditService::class);
         $this->app->singleton(Services\LoginBlockService::class);
+        $this->app->singleton(Services\LoginLogService::class);
         $this->app->singleton(Services\PasswordPolicyService::class);
         $this->app->singleton(Services\IdleTimeoutService::class);
     }
@@ -42,6 +50,11 @@ class SecuritySuiteServiceProvider extends ServiceProvider
             __DIR__ . '/../resources/views/' => resource_path('views/vendor/security-suite'),
         ], 'security-suite-views');
 
+        // Publish idle-timeout script for app layout
+        $this->publishes([
+            __DIR__ . '/../resources/js/idle-timeout.js' => public_path('vendor/security-suite/idle-timeout.js'),
+        ], 'security-suite-assets');
+
         // Load views
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'security-suite');
 
@@ -49,9 +62,15 @@ class SecuritySuiteServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
         // Register middleware aliases
-        $router->aliasMiddleware('idle.timeout',      Middleware\CheckIdleTimeout::class);
+        $router->aliasMiddleware('idle.timeout',     Middleware\CheckIdleTimeout::class);
         $router->aliasMiddleware('password.expiry',   Middleware\CheckPasswordExpiry::class);
-        $router->aliasMiddleware('http.logger',        Middleware\LogHttpRequest::class);
+        $router->aliasMiddleware('http.logger',       Middleware\LogHttpRequest::class);
+        $router->aliasMiddleware('login.security',    Middleware\SecureLoginFlow::class);
+
+        // Auth event listeners (login / logout / failed login logging)
+        Event::listen(Login::class,  LogSuccessfulLogin::class);
+        Event::listen(Logout::class, LogUserLogout::class);
+        Event::listen(Failed::class, LogFailedLogin::class);
 
         // Load package routes
         $this->loadRoutesFrom(__DIR__ . '/../routes/security.php');

@@ -1,26 +1,44 @@
 {
     "name": "imransaleem/security-suite",
-    "description": "Laravel security package: audit logs, password policy, idle timeout, login block, HTTP request logging.",
+    "description": "Laravel security package: audit logs, login logs, password policy, login lockout, idle timeout, HTTP logging, Bootstrap admin menu, and login-flow security.",
     "type": "library",
     "license": "MIT",
     "keywords": [
         "laravel",
         "security",
         "audit-log",
+        "login-log",
         "password-policy",
         "idle-timeout",
-        "login-block"
+        "login-block",
+        "http-logger",
+        "bootstrap"
     ],
     "authors": [
         {
             "name": "Imran Saleem",
-            "homepage": "https://github.com/imransaleem"
+            "homepage": "https://github.com/imransaleem25"
         }
     ],
-    "homepage": "https://github.com/imransaleem/security-suite",
+    "homepage": "https://github.com/imransaleem25/security-suite",
     "support": {
-        "issues": "https://github.com/imransaleem/security-suite/issues",
-        "source": "https://github.com/imransaleem/security-suite"
+        "issues": "https://github.com/imransaleem25/security-suite/issues",
+        "source": "https://github.com/imransaleem25/security-suite"
+    },
+    "require": {
+        "php": "^7.4|^8.0",
+        "ext-json": "*",
+        "illuminate/auth": "^8.0|^9.0|^10.0",
+        "illuminate/database": "^8.0|^9.0|^10.0",
+        "illuminate/events": "^8.0|^9.0|^10.0",
+        "illuminate/http": "^8.0|^9.0|^10.0",
+        "illuminate/routing": "^8.0|^9.0|^10.0",
+        "illuminate/support": "^8.0|^9.0|^10.0",
+        "illuminate/validation": "^8.0|^9.0|^10.0",
+        "illuminate/view": "^8.0|^9.0|^10.0"
+    },
+    "suggest": {
+        "spatie/laravel-permission": "Required for admin UI routes that use the role middleware (^5.0 for Laravel 8, ^5.8|^6.0 for Laravel 9–10)"
     },
     "autoload": {
         "psr-4": {
@@ -32,18 +50,13 @@
             "providers": [
                 "ImranSaleem\\SecuritySuite\\SecuritySuiteServiceProvider"
             ]
+        },
+        "branch-alias": {
+            "dev-main": "1.1.x-dev"
         }
     },
-    "require": {
-        "php": "^7.4|^8.0",
-        "illuminate/support": "^8.0|^9.0|^10.0",
-        "illuminate/database": "^8.0|^9.0|^10.0",
-        "illuminate/http": "^8.0|^9.0|^10.0",
-        "illuminate/routing": "^8.0|^9.0|^10.0",
-        "illuminate/validation": "^8.0|^9.0|^10.0"
-    },
-    "suggest": {
-        "spatie/laravel-permission": "Required for admin UI routes that use the role middleware (^5.0)"
+    "config": {
+        "sort-packages": true
     },
     "minimum-stability": "stable",
     "prefer-stable": true

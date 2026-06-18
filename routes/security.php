@@ -5,6 +5,7 @@ use ImranSaleem\SecuritySuite\Http\Controllers\AuditLogController;
 use ImranSaleem\SecuritySuite\Http\Controllers\PasswordController;
 use ImranSaleem\SecuritySuite\Http\Controllers\IdleController;
 use ImranSaleem\SecuritySuite\Http\Controllers\HttpLogController;
+use ImranSaleem\SecuritySuite\Http\Controllers\LoginLogController;
 
 $prefix = config('security_suite.route_prefix', 'security');
 
@@ -25,5 +26,7 @@ Route::prefix($prefix)->middleware(['web'])->group(function () {
         Route::get('/users/{userId}/password-history', [PasswordController::class, 'history'])->name('users.password.history');
         Route::get('/http-logs', [HttpLogController::class, 'index'])->name('http.logs.index');
         Route::get('/http-logs/{httpLog}', [HttpLogController::class, 'show'])->name('http.logs.show');
+        Route::get('/login-logs', [LoginLogController::class, 'index'])->name('login.logs.index');
+        Route::get('/failed-login-logs', [LoginLogController::class, 'failed'])->name('login.failed.logs');
     });
 });
