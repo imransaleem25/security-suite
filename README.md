@@ -286,27 +286,3 @@ security-suite/
 
 MIT — see [LICENSE](LICENSE).
 
----
-
-## Packagist (maintainers)
-
-Package: [packagist.org/packages/imransaleem/security-suite](https://packagist.org/packages/imransaleem/security-suite)
-
-After merging changes:
-
-1. Push to `https://github.com/imransaleem25/security-suite`
-2. Tag a stable release (Packagist serves stable versions from Git tags):
-
-   ```bash
-   git tag -a v1.1.0 -m "Add login logs, Logs menu, login-flow security, idle-timeout asset"
-   git push origin v1.1.0
-   ```
-
-3. Confirm the Packagist GitHub webhook auto-update ran (or click **Update** on Packagist)
-4. Verify:
-
-   ```bash
-   composer require imransaleem/security-suite:^1.1
-   ```
-
-`dev-main` resolves to `1.1.x-dev` via the Composer branch alias in `composer.json`.
