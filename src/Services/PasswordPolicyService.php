@@ -2,7 +2,7 @@
 
 namespace ImranSaleem\SecuritySuite\Services;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Hash;
 use ImranSaleem\SecuritySuite\Models\PasswordHistory;
 use Illuminate\Validation\Rules\Password as PasswordRule;
@@ -77,7 +77,8 @@ class PasswordPolicyService
         if (!$user->password_changed_at) {
             return false;
         }
-        return now()->diffInDays($user->password_changed_at) >= $this->expiryDays;
+        // Absolute diff: Carbon 3 returns signed values by default.
+        return (int) now()->diffInDays($user->password_changed_at, true) >= $this->expiryDays;
     }
 
     /**

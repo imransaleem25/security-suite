@@ -42,9 +42,13 @@ class LogHttpRequest
                 $body = $request->except(['password', 'new_password', 'current_password', 'new_password_confirmation', 'captcha', '_token']);
                 if (!empty($body)) {
                     $encoded = json_encode($body);
-                    $requestPayload = $maxLen > 0 && strlen($encoded) > $maxLen
-                        ? json_decode(substr($encoded, 0, $maxLen), true)
-                        : $body;
+                    if ($encoded === false) {
+                        $requestPayload = $body;
+                    } elseif ($maxLen > 0 && strlen($encoded) > $maxLen) {
+                        $requestPayload = json_decode(substr($encoded, 0, $maxLen), true) ?? ['_truncated' => true];
+                    } else {
+                        $requestPayload = $body;
+                    }
                 }
             }
 
@@ -52,11 +56,15 @@ class LogHttpRequest
             $responsePayload = null;
             if (config('http_logger.log_response', false)) {
                 $content = $response->getContent();
-                if ($content && $maxLen > 0 && strlen($content) > $maxLen) {
-                    $content = substr($content, 0, $maxLen) . '...[truncated]';
+                if (is_string($content) && $content !== '') {
+                    if ($maxLen > 0 && strlen($content) > $maxLen) {
+                        $content = substr($content, 0, $maxLen) . '...[truncated]';
+                    }
+                    $decoded = json_decode($content, true);
+                    $responsePayload = json_last_error() === JSON_ERROR_NONE
+                        ? $decoded
+                        : ['raw' => $content];
                 }
-                $decoded = json_decode($content, true);
-                $responsePayload = json_last_error() === JSON_ERROR_NONE ? $decoded : ['raw' => $content];
             }
 
             // Route name

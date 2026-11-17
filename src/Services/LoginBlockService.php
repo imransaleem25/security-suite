@@ -3,7 +3,7 @@
 namespace ImranSaleem\SecuritySuite\Services;
 
 use Carbon\Carbon;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Contracts\Auth\Authenticatable;
 
 class LoginBlockService
 {
@@ -29,7 +29,8 @@ class LoginBlockService
         }
 
         if ($user->locked_until && Carbon::now()->lt($user->locked_until)) {
-            $remaining = (int) ceil(Carbon::now()->floatDiffInMinutes($user->locked_until));
+            // Absolute diff: Carbon 3 signed floatDiffIn* is deprecated / wrong for remaining time.
+            $remaining = (int) ceil(Carbon::now()->diffInMinutes($user->locked_until, true));
             return "Too many failed attempts. Try again in {$remaining} minute(s).";
         }
 

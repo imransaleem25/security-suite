@@ -2,7 +2,7 @@
 
 namespace ImranSaleem\SecuritySuite\Services;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Request;
 use ImranSaleem\SecuritySuite\Models\LoginLog;
 

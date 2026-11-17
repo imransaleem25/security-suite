@@ -54,7 +54,18 @@ php artisan vendor:publish --tag=security-suite-assets
 php artisan migrate
 ```
 
-Wire middleware in `app/Http/Kernel.php` `web` group:
+Wire middleware in the `web` stack:
+
+**Laravel 11+** (`bootstrap/app.php`):
+
+```php
+$middleware->web(append: [
+    \ImranSaleem\SecuritySuite\Middleware\CheckPasswordExpiry::class,
+    \ImranSaleem\SecuritySuite\Middleware\CheckIdleTimeout::class,
+]);
+```
+
+**Laravel 10** (`app/Http/Kernel.php` `web` group):
 
 ```php
 \ImranSaleem\SecuritySuite\Middleware\CheckPasswordExpiry::class,
@@ -93,8 +104,8 @@ composer dump-autoload
 ## Recreate the demo app
 
 ```bash
-composer create-project laravel/laravel:^8.0 security-suite-demo
+composer create-project laravel/laravel:^12.0 security-suite-demo
 # add path repository + follow steps in database/seeders/DemoSeeder.php
 ```
 
-The demo requires PHP 7.4+ and Laravel 8 (matches this machine's PHP 7.4.26).
+The package requires PHP 8.3+ and Laravel 10.48+ / 11 / 12 / 13.

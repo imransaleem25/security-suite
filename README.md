@@ -24,8 +24,8 @@ A plug-and-play Laravel package for audit logging, password policy, login lockou
 
 ## Requirements
 
-- PHP 7.4+ with `ext-json`
-- Laravel 8, 9, or 10
+- PHP 8.3+ with `ext-json`
+- Laravel 10.48+, 11, 12, or 13
 - [spatie/laravel-permission](https://github.com/spatie/laravel-permission) suggested for admin UI routes (`role` middleware)
 
 ---
@@ -48,7 +48,22 @@ php artisan migrate
 
 See [TESTING.md](TESTING.md) for local path-repository setup and the included demo app.
 
-### Middleware (`app/Http/Kernel.php`)
+### Middleware
+
+**Laravel 11+** (`bootstrap/app.php`):
+
+```php
+->withMiddleware(function (Middleware $middleware) {
+    $middleware->web(append: [
+        \ImranSaleem\SecuritySuite\Middleware\CheckPasswordExpiry::class,
+        \ImranSaleem\SecuritySuite\Middleware\CheckIdleTimeout::class,
+        // optional:
+        // \ImranSaleem\SecuritySuite\Middleware\LogHttpRequest::class,
+    ]);
+})
+```
+
+**Laravel 10** (`app/Http/Kernel.php`):
 
 ```php
 protected $middlewareGroups = [
